@@ -1,0 +1,8 @@
+**/target
+node_modules
+.cargo
+web/assets
+web/*.ts
+web/*.js
+web/*.wasm*
+out.csv

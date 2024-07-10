@@ -1,0 +1,11 @@
+[package]
+name = "runner"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+flate2 = "1.0.30"
+itertools = "0.13.0"
+strum = "0.26.3"
+strum_macros = "0.26.4"
