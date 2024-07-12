@@ -45,7 +45,7 @@ fn main() -> Result<()> {
     let mut csv = File::create("out.csv")?;
     writeln!(
         csv,
-        "opt_level,wasm_opt,lto,codegen_units,build_time,wasm_opt_time,frame_time"
+        "opt_level,wasm_opt,lto,codegen_units,build_time,wasm_opt_time,size,size_gzipped,frame_time"
     )?;
 
     let cargo_options_iter = iproduct!(OptLevel::iter(), Lto::iter(), CodegenUnits::iter());
@@ -186,13 +186,15 @@ fn main() -> Result<()> {
 
             writeln!(
                 csv,
-                "{:?},{:?},{:?},{:?},{:?},{:?},{:?}",
+                "{:?},{:?},{:?},{:?},{:?},{:?},{},{},{}",
                 opt_level,
                 wasm_opt,
                 lto,
                 codegen_units,
                 build_time.as_secs_f32(),
                 wasm_opt_time.as_secs_f32(),
+                attr.len(),
+                attr_gz.len(),
                 frame_time
             )
             .context("Writing to out.csv")?;
