@@ -10,6 +10,7 @@ use options::*;
 
 use anyhow::{Context, Result};
 use itertools::iproduct;
+use size::Size;
 use strum::IntoEnumIterator;
 
 mod options;
@@ -138,7 +139,11 @@ fn main() -> Result<()> {
 
             let attr_gz = std::fs::metadata(format!("{}.gz", bindgen_wasm_path))?;
 
-            println!("{:?} ({:?} gzipped)", attr.size(), attr_gz.size());
+            println!(
+                "{} ({} gzipped)",
+                Size::from_bytes(attr.size()),
+                Size::from_bytes(attr_gz.size())
+            );
             println!("{:.2?} (+{:.2?} wasm-opt)", build_time, wasm_opt_time);
 
             println!("Testing runtime performance.");
