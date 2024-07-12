@@ -48,9 +48,12 @@ fn main() -> Result<()> {
         "opt_level,wasm_opt,lto,codegen_units,build_time,wasm_opt_time,frame_time"
     )?;
 
-    for (opt_level, lto, codegen_units) in
-        iproduct!(OptLevel::iter(), Lto::iter(), CodegenUnits::iter())
-    {
+    let cargo_options_iter = iproduct!(OptLevel::iter(), Lto::iter(), CodegenUnits::iter());
+    let num_options = cargo_options_iter.clone().count();
+
+    for (i, (opt_level, lto, codegen_units)) in cargo_options_iter.enumerate() {
+        println!("Cargo configuration {}/{}", i + 1, num_options);
+
         // Create cargo options
 
         let options_toml = [opt_level.option(), lto.option(), codegen_units.option()].join("\n");
