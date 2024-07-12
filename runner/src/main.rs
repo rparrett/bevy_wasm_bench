@@ -45,7 +45,7 @@ fn main() -> Result<()> {
     let mut csv = File::create("out.csv")?;
     writeln!(
         csv,
-        "opt_level,wasm_opt,lto,codegen_units,build_time,wasm_opt_time,frame_time\n"
+        "opt_level,wasm_opt,lto,codegen_units,build_time,wasm_opt_time,frame_time"
     )?;
 
     for (opt_level, lto, codegen_units) in
