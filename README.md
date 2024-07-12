@@ -1,6 +1,6 @@
 # bevy_wasm_bench
 
-Testing various wasm optimizations with Bevy
+Automated testing of Bevy for runtime performance with various wasm optimizations
 
 ## Requirements
 
