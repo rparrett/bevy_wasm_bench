@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufReader, Write};
 use std::process::Stdio;
 use std::time::{Duration, Instant};
-use std::{os::unix::fs::MetadataExt, path::Path, process::Command};
+use std::{path::Path, process::Command};
 
 use flate2::write::GzEncoder;
 use flate2::Compression;
@@ -19,10 +19,15 @@ const PROFILE: &str = "bevy_wasm_bench";
 const NAME: &str = "bevy_wasm_bench";
 const OUT_DIR: &str = "web";
 
+#[cfg(target_os = "windows")]
+const WASM_OPT_COMMAND: &str = "./wasm-opt.exe";
+#[cfg(not(target_os = "windows"))]
+const WASM_OPT_COMMAND: &str = "wasm-opt";
+
 fn main() -> Result<()> {
     check_all_deps(&[
         "cargo",
-        "wasm-opt",
+        WASM_OPT_COMMAND,
         "basic-http-server",
         "wasm-bindgen",
         "node",
@@ -113,7 +118,7 @@ fn main() -> Result<()> {
             let now = Instant::now();
 
             if wasm_opt.enabled() {
-                Command::new("wasm-opt")
+                Command::new(WASM_OPT_COMMAND)
                     .args(wasm_opt.args())
                     .arg(&bindgen_wasm_path)
                     .args(["-o", &bindgen_wasm_path])
@@ -141,8 +146,8 @@ fn main() -> Result<()> {
 
             println!(
                 "{} ({} gzipped)",
-                Size::from_bytes(attr.size()),
-                Size::from_bytes(attr_gz.size())
+                Size::from_bytes(attr.len()),
+                Size::from_bytes(attr_gz.len())
             );
             println!("{:.2?} (+{:.2?} wasm-opt)", build_time, wasm_opt_time);
 
