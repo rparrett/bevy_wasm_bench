@@ -1,6 +1,7 @@
 //! This example provides a 2D benchmark.
 //!
-//! Usage: spawn more entities by clicking on the screen.
+//! It was hastily copied from Bevy's `bevymark`, and could probably
+//! use some cleanup
 
 use bevy::{
     color::palettes::basic::*,
