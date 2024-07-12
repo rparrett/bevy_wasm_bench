@@ -46,6 +46,20 @@ impl CodegenUnits {
     }
 }
 
+#[derive(EnumIter, Debug, Clone)]
+pub enum Strip {
+    None,
+    DebugInfo,
+}
+impl Strip {
+    pub fn option(&self) -> String {
+        match self {
+            Self::None => "".to_string(),
+            Self::DebugInfo => "strip = \"debuginfo\"".to_string(),
+        }
+    }
+}
+
 #[derive(EnumIter, Debug)]
 pub enum WasmOpt {
     None,

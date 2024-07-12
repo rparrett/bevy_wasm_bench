@@ -45,18 +45,29 @@ fn main() -> Result<()> {
     let mut csv = File::create("out.csv")?;
     writeln!(
         csv,
-        "opt_level,wasm_opt,lto,codegen_units,build_time,wasm_opt_time,size,size_gzipped,frame_time"
+        "opt_level,wasm_opt,lto,codegen_units,strip,build_time,wasm_opt_time,size,size_gzipped,frame_time"
     )?;
 
-    let cargo_options_iter = iproduct!(OptLevel::iter(), Lto::iter(), CodegenUnits::iter());
+    let cargo_options_iter = iproduct!(
+        OptLevel::iter(),
+        Lto::iter(),
+        CodegenUnits::iter(),
+        Strip::iter()
+    );
     let num_options = cargo_options_iter.clone().count();
 
-    for (i, (opt_level, lto, codegen_units)) in cargo_options_iter.enumerate() {
+    for (i, (opt_level, lto, codegen_units, strip)) in cargo_options_iter.enumerate() {
         println!("Cargo configuration {}/{}", i + 1, num_options);
 
         // Create cargo options
 
-        let options_toml = [opt_level.option(), lto.option(), codegen_units.option()].join("\n");
+        let options_toml = [
+            opt_level.option(),
+            lto.option(),
+            codegen_units.option(),
+            strip.option(),
+        ]
+        .join("\n");
 
         std::fs::create_dir_all(".cargo")?;
         std::fs::write(
@@ -79,8 +90,8 @@ fn main() -> Result<()> {
         // Build wasm
 
         println!(
-            "Building with OptLevel::{:?}, Lto::{:?}, CodegenUnits::{:?}",
-            opt_level, lto, codegen_units
+            "Building with OptLevel::{:?}, Lto::{:?}, CodegenUnits::{:?}, Strip::{:?}",
+            opt_level, lto, codegen_units, strip
         );
 
         let now = Instant::now();
@@ -186,11 +197,12 @@ fn main() -> Result<()> {
 
             writeln!(
                 csv,
-                "{:?},{:?},{:?},{:?},{:?},{:?},{},{},{}",
+                "{:?},{:?},{:?},{:?},{:?},{},{},{},{},{}",
                 opt_level,
                 wasm_opt,
                 lto,
                 codegen_units,
+                strip,
                 build_time.as_secs_f32(),
                 wasm_opt_time.as_secs_f32(),
                 attr.len(),
