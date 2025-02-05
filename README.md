@@ -19,3 +19,15 @@ MIT or Apache 2.0
 ## Results
 
 [`d98b3a8_win11_i713700KF_4080super.csv`](./results/d98b3a8_win11_i713700KF_4080super.csv)
+
+## Conclusions
+
+Data analysis is being left as an exercise for the reader. There are tradeoffs between frame time, compile time, and file size to consider. But for my dist builds, I will be using:
+
+|setting|value|note|
+|-|-|-|
+|opt_level|`S`|`Z` is slow|
+|wasm_opt|`S`|The particular setting isn't super important|
+|lto|`Fat`|`Thin` if compile time is a concern|
+|codegen_units|`Default`|`One` if file size is a concern|
+|strip|`None`|insignificant|
