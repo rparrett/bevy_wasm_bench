@@ -22,7 +22,9 @@ MIT or Apache 2.0
 
 ## Conclusions
 
-Data analysis is being left as an exercise for the reader. There are tradeoffs between frame time, compile time, and file size to consider. But for my dist builds, I will be using:
+There's some very rudimentary analysis in the [./analysis](analysis) folder, but there are tradeoffs between frame time, compile time, and file size to consider, so you may want to do your own.
+
+For own my dist builds, I will be using:
 
 |setting|value|note|
 |-|-|-|
