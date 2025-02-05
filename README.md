@@ -27,7 +27,7 @@ Data analysis is being left as an exercise for the reader. There are tradeoffs b
 |setting|value|note|
 |-|-|-|
 |opt_level|`S`|`Z` is slow|
-|wasm_opt|`S`|The particular setting isn't super important|
+|wasm_opt|`S`|Use this, but the particular setting isn't super important|
 |lto|`Fat`|`Thin` if compile time is a concern|
 |codegen_units|`Default`|`One` if file size is a concern|
-|strip|`None`|insignificant|
+|strip|`None`|Insignificant|
