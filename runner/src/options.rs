@@ -88,3 +88,17 @@ impl WasmOpt {
         }
     }
 }
+
+#[derive(EnumIter, Debug)]
+pub enum Panic {
+    Unwind,
+    Abort,
+}
+impl Panic {
+    pub fn option(&self) -> String {
+        match self {
+            Self::Unwind => "panic = \"unwind\"".to_string(),
+            Self::Abort => "panic = \"abort\"".to_string(),
+        }
+    }
+}

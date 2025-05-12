@@ -52,11 +52,12 @@ fn main() -> Result<()> {
         OptLevel::iter(),
         Lto::iter(),
         CodegenUnits::iter(),
-        Strip::iter()
+        Strip::iter(),
+        Panic::iter()
     );
     let num_options = cargo_options_iter.clone().count();
 
-    for (i, (opt_level, lto, codegen_units, strip)) in cargo_options_iter.enumerate() {
+    for (i, (opt_level, lto, codegen_units, strip, panic)) in cargo_options_iter.enumerate() {
         println!("Cargo configuration {}/{}", i + 1, num_options);
 
         // Create cargo options
@@ -66,6 +67,7 @@ fn main() -> Result<()> {
             lto.option(),
             codegen_units.option(),
             strip.option(),
+            panic.option(),
         ]
         .join("\n");
 
@@ -90,8 +92,8 @@ fn main() -> Result<()> {
         // Build wasm
 
         println!(
-            "Building with OptLevel::{:?}, Lto::{:?}, CodegenUnits::{:?}, Strip::{:?}",
-            opt_level, lto, codegen_units, strip
+            "Building with OptLevel::{:?}, Lto::{:?}, CodegenUnits::{:?}, Strip::{:?} Panic::{:?}",
+            opt_level, lto, codegen_units, strip, panic
         );
 
         let now = Instant::now();
@@ -197,12 +199,13 @@ fn main() -> Result<()> {
 
             writeln!(
                 csv,
-                "{:?},{:?},{:?},{:?},{:?},{},{},{},{},{}",
+                "{:?},{:?},{:?},{:?},{:?},{:?},{},{},{},{},{}",
                 opt_level,
                 wasm_opt,
                 lto,
                 codegen_units,
                 strip,
+                panic,
                 build_time.as_secs_f32(),
                 wasm_opt_time.as_secs_f32(),
                 attr.len(),
