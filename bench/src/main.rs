@@ -3,12 +3,12 @@
 //! It was hastily copied from Bevy's `bevymark`, and could probably
 //! use some cleanup
 
+use std::time::Duration;
+
 use bevy::{
     color::palettes::basic::*,
-    core::FrameCount,
-    diagnostic::FrameTimeDiagnosticsPlugin,
+    diagnostic::{DiagnosticsStore, FrameCount, FrameTimeDiagnosticsPlugin},
     prelude::*,
-    utils::Duration,
     window::{PresentMode, WindowResolution},
     winit::{UpdateMode, WinitSettings},
 };
@@ -49,7 +49,7 @@ fn main() {
                 }),
                 ..default()
             }),
-            FrameTimeDiagnosticsPlugin,
+            FrameTimeDiagnosticsPlugin::default(),
         ))
         .insert_resource(WinitSettings {
             focused_mode: UpdateMode::Continuous,
@@ -81,7 +81,9 @@ fn scheduled_spawner(
         return;
     }
 
-    let window = windows.single();
+    let Ok(window) = windows.single() else {
+        return;
+    };
 
     let bird_resources = bird_resources.into_inner();
     spawn_birds(
@@ -116,41 +118,49 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         transform_rng: ChaCha8Rng::seed_from_u64(42),
     };
 
-    let text_section = move |color: Srgba, value: &str| {
-        TextSection::new(
-            value,
-            TextStyle {
-                font_size: 40.0,
-                color: color.into(),
-                ..default()
-            },
-        )
+    let font = TextFont {
+        font_size: 40.0,
+        ..Default::default()
     };
 
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d);
     commands
-        .spawn(NodeBundle {
-            style: Style {
+        .spawn((
+            Node {
                 position_type: PositionType::Absolute,
                 padding: UiRect::all(Val::Px(5.0)),
                 ..default()
             },
-            z_index: ZIndex::Global(i32::MAX),
-            background_color: Color::BLACK.with_alpha(0.75).into(),
-            ..default()
-        })
-        .with_children(|c| {
-            c.spawn((
-                TextBundle::from_sections([
-                    text_section(LIME, "Bird Count: "),
-                    text_section(AQUA, ""),
-                    text_section(LIME, "\nFPS (raw): "),
-                    text_section(AQUA, ""),
-                    text_section(LIME, "\nFPS (avg): "),
-                    text_section(AQUA, ""),
-                ]),
-                StatsText,
-            ));
+            BackgroundColor(Color::BLACK.with_alpha(0.75)),
+            GlobalZIndex(i32::MAX),
+        ))
+        .with_children(|p| {
+            p.spawn((Text::default(), StatsText)).with_children(|p| {
+                p.spawn((
+                    TextSpan::new("Bird Count: "),
+                    font.clone(),
+                    TextColor(LIME.into()),
+                ));
+                p.spawn((TextSpan::new(""), font.clone(), TextColor(AQUA.into())));
+                p.spawn((
+                    TextSpan::new("\nFPS (raw): "),
+                    font.clone(),
+                    TextColor(LIME.into()),
+                ));
+                p.spawn((TextSpan::new(""), font.clone(), TextColor(AQUA.into())));
+                p.spawn((
+                    TextSpan::new("\nFPS (SMA): "),
+                    font.clone(),
+                    TextColor(LIME.into()),
+                ));
+                p.spawn((TextSpan::new(""), font.clone(), TextColor(AQUA.into())));
+                p.spawn((
+                    TextSpan::new("\nFPS (EMA): "),
+                    font.clone(),
+                    TextColor(LIME.into()),
+                ));
+                p.spawn((TextSpan::new(""), font.clone(), TextColor(AQUA.into())));
+            });
         });
 
     commands.insert_resource(bird_resources);
@@ -214,12 +224,12 @@ fn spawn_birds(
             );
 
             (
-                SpriteBundle {
-                    transform,
-                    texture: bird_resources.texture.clone(),
-                    sprite: Sprite { color, ..default() },
+                Sprite {
+                    image: bird_resources.texture.clone(),
+                    color,
                     ..default()
                 },
+                transform,
                 Bird { velocity },
             )
         })
@@ -263,7 +273,9 @@ fn handle_collision(half_extents: Vec2, translation: &Vec3, velocity: &mut Vec3)
     }
 }
 fn collision_system(windows: Query<&Window>, mut bird_query: Query<(&mut Bird, &Transform)>) {
-    let window = windows.single();
+    let Ok(window) = windows.single() else {
+        return;
+    };
 
     let half_extents = 0.5 * window.size();
 
@@ -273,20 +285,28 @@ fn collision_system(windows: Query<&Window>, mut bird_query: Query<(&mut Bird, &
 }
 
 fn counter_system(
+    diagnostics: Res<DiagnosticsStore>,
     counter: Res<BevyCounter>,
-    mut query: Query<&mut Text, With<StatsText>>,
-    time: Res<Time>,
-    frame_count: Res<FrameCount>,
+    query: Single<Entity, With<StatsText>>,
+    mut writer: TextUiWriter,
 ) {
-    let mut text = query.single_mut();
+    let text = *query;
 
     if counter.is_changed() {
-        text.sections[1].value = counter.count.to_string();
+        *writer.text(text, 2) = counter.count.to_string();
     }
 
-    text.sections[3].value = format!("{:.2}", 1. / time.delta_seconds());
-
-    text.sections[5].value = format!("{:.2}", frame_count.0 as f32 / time.elapsed_seconds());
+    if let Some(fps) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS) {
+        if let Some(raw) = fps.value() {
+            *writer.text(text, 4) = format!("{raw:.2}");
+        }
+        if let Some(sma) = fps.average() {
+            *writer.text(text, 6) = format!("{sma:.2}");
+        }
+        if let Some(ema) = fps.smoothed() {
+            *writer.text(text, 8) = format!("{ema:.2}");
+        }
+    };
 }
 
 fn measure(
@@ -307,7 +327,7 @@ fn measure(
 
     if start_time.is_none() {
         info!("Starting measurement");
-        *start_time = Some(time.elapsed_seconds());
+        *start_time = Some(time.elapsed_secs());
         *start_frame = Some(frame_count.0);
         return;
     }
@@ -315,7 +335,7 @@ fn measure(
     let start_time = start_time.unwrap();
     let start_frame = start_frame.unwrap();
 
-    let elapsed = time.elapsed_seconds() - start_time;
+    let elapsed = time.elapsed_secs() - start_time;
 
     if elapsed >= 5. {
         *done = true;
