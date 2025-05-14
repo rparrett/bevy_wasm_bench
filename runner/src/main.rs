@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{BufReader, Write};
-use std::process::Stdio;
+use std::process::{Stdio};
 use std::time::{Duration, Instant};
 use std::{path::Path, process::Command};
 
@@ -98,14 +98,19 @@ fn main() -> Result<()> {
 
         let now = Instant::now();
 
-        Command::new("cargo")
+        let output = Command::new("cargo")
             .arg("build")
             .arg("-p")
             .arg("bench")
             .arg("--target=wasm32-unknown-unknown")
             .args(["--profile", PROFILE])
             .output()
-            .context("Running cargo build")?;
+            .context("Building bench")?;
+        if !output.status.success() {
+            std::io::stdout().write_all(&output.stdout)?;
+            std::io::stderr().write_all(&output.stderr)?;
+            anyhow::bail!("Failed to build bench");
+        }
 
         let build_time = now.elapsed();
 
@@ -114,7 +119,7 @@ fn main() -> Result<()> {
 
             println!("Running bindgen.");
 
-            Command::new("wasm-bindgen")
+            let output = Command::new("wasm-bindgen")
                 .args([
                     "--out-name",
                     NAME,
@@ -126,6 +131,11 @@ fn main() -> Result<()> {
                 ])
                 .output()
                 .context("Running wasm-bindgen")?;
+            if !output.status.success() {
+                std::io::stdout().write_all(&output.stdout)?;
+                std::io::stderr().write_all(&output.stderr)?;
+                anyhow::bail!("Failed to run wasm-bindgen");
+            }
 
             println!("Running wasm-opt with WasmOpt::{:?}", wasm_opt);
 
@@ -134,12 +144,17 @@ fn main() -> Result<()> {
             let now = Instant::now();
 
             if wasm_opt.enabled() {
-                Command::new(WASM_OPT_COMMAND)
+                let output = Command::new(WASM_OPT_COMMAND)
                     .args(wasm_opt.args())
                     .arg(&bindgen_wasm_path)
                     .args(["-o", &bindgen_wasm_path])
                     .output()
                     .context("Running wasm-opt")?;
+                if !output.status.success() {
+                    std::io::stdout().write_all(&output.stdout)?;
+                    std::io::stderr().write_all(&output.stderr)?;
+                    anyhow::bail!("Failed to run wasm-opt");
+                }
             }
 
             let wasm_opt_time = if wasm_opt.enabled() {
