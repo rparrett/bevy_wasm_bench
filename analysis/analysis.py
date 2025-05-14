@@ -138,6 +138,7 @@ cat_vars = ["opt_level", "wasm_opt", "lto", "codegen_units", "strip", "panic"]
 
 for cat_col in cat_vars:
     data[cat_col] = data[cat_col].astype("category")
+    data["total_build_time"] = data["build_time"] + data["wasm_opt_time"]
 
 print(data["strip"].unique())
 
@@ -161,7 +162,13 @@ with PdfPages(pdf_filename) as pdf:
         pdf.savefig(fig)
         plt.close(fig)
 
-    for response_col in ["frame_time", "size_gzipped", "build_time", "wasm_opt_time"]:
+    for response_col in [
+        "frame_time",
+        "size_gzipped",
+        "build_time",
+        "wasm_opt_time",
+        "total_build_time",
+    ]:
         fig = create_lm_coef_plot(response_col, data)
         pdf.savefig(fig)
         plt.close(fig)
