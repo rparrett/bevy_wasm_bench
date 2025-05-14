@@ -161,7 +161,7 @@ with PdfPages(pdf_filename) as pdf:
         pdf.savefig(fig)
         plt.close(fig)
 
-    for response_col in ["frame_time", "size_gzipped"]:
+    for response_col in ["frame_time", "size_gzipped", "build_time", "wasm_opt_time"]:
         fig = create_lm_coef_plot(response_col, data)
         pdf.savefig(fig)
         plt.close(fig)
