@@ -169,31 +169,7 @@ fn main() -> Result<()> {
 
             println!("Testing runtime performance.");
 
-            let mut h = Command::new("basic-http-server")
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .arg("web")
-                .arg("-a")
-                .arg("127.0.0.1:1334")
-                .spawn()
-                .context("Starting web server")?;
-
-            // Run Puppeteer, collect output
-
-            let puppeteer_out = Command::new("node")
-                .arg("index.js")
-                .output()
-                .context("Running puppeteer")?;
-
-            let frame_time = String::from_utf8(puppeteer_out.stdout)
-                .context("Building utf8 from puppeteer output")?
-                .trim()
-                .parse::<f32>()
-                .context("Parsing puppeteer output")?;
-
-            println!("{:2}ms", frame_time);
-
-            h.kill().context("Killing web server")?;
+            let frame_time = retry(run_test, 3)?;
 
             println!();
 
@@ -217,6 +193,34 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn run_test() -> Result<f32, anyhow::Error> {
+    let mut h = Command::new("basic-http-server")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .arg("web")
+        .arg("-a")
+        .arg("127.0.0.1:1334")
+        .spawn()
+        .context("Starting web server")?;
+
+    let puppeteer_out = Command::new("node")
+        .arg("index.js")
+        .output()
+        .context("Running puppeteer")?;
+
+    let frame_time = String::from_utf8(puppeteer_out.stdout)
+        .context("Building utf8 from puppeteer output")?
+        .trim()
+        .parse::<f32>()
+        .context("Parsing puppeteer output")?;
+
+    println!("{:2}ms", frame_time);
+
+    h.kill().context("Killing web server")?;
+
+    Ok(frame_time)
 }
 
 fn check_all_deps(deps: &[&str]) -> Result<()> {
@@ -259,4 +263,23 @@ where
     let _ = encoder.finish()?;
 
     Ok(())
+}
+
+/// Retries a fallible function up to `retries` times.
+/// Returns `Ok(T)` on success, or the last `Err(E)` after exhausting retries.
+fn retry<F, T, E>(mut operation: F, retries: usize) -> Result<T, E>
+where
+    F: FnMut() -> Result<T, E>,
+{
+    let mut attempts = 0;
+
+    loop {
+        match operation() {
+            Ok(val) => return Ok(val),
+            Err(_) if attempts < retries => {
+                attempts += 1;
+            }
+            Err(e) => return Err(e),
+        }
+    }
 }
