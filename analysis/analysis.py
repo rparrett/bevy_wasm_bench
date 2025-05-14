@@ -5,7 +5,7 @@ import statsmodels.formula.api as smf
 import re
 from matplotlib.backends.backend_pdf import PdfPages
 
-DATA_CSV = "../results/d98b3a8_win11_i713700KF_4080super.csv"
+DATA_CSV = "../results/6efce10_win11_i713700KF_4080super.csv"
 
 
 def build_formula(response_col, cat_vars, baselines_dict):
