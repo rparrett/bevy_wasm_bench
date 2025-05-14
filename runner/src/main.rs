@@ -45,7 +45,7 @@ fn main() -> Result<()> {
     let mut csv = File::create("out.csv")?;
     writeln!(
         csv,
-        "opt_level,wasm_opt,lto,codegen_units,strip,build_time,wasm_opt_time,size,size_gzipped,frame_time"
+        "opt_level,wasm_opt,lto,codegen_units,strip,panic,build_time,wasm_opt_time,size,size_gzipped,frame_time"
     )?;
 
     let cargo_options_iter = iproduct!(
