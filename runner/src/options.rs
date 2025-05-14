@@ -11,7 +11,7 @@ impl OptLevel {
         match self {
             Self::S => "opt-level = \"s\"".to_string(),
             Self::Z => "opt-level = \"z\"".to_string(),
-            Self::Three => "opt-level = \"3\"".to_string(),
+            Self::Three => "opt-level = 3".to_string(),
         }
     }
 }
