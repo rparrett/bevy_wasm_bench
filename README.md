@@ -18,11 +18,15 @@ MIT or Apache 2.0
 
 ## Results
 
-[`d98b3a8_win11_i713700KF_4080super.csv`](./results/d98b3a8_win11_i713700KF_4080super.csv)
+|file|bevy|notes|
+|-|-|-|
+|[`42674c1_win11_i713700KF_4080super.csv`](./results/42674c1_win11_i713700KF_4080super.csv)|0.16|
+|[`6efce10_win11_i713700KF_4080super.csv`](./results/6efce10_win11_i713700KF_4080super.csv)|0.16|Bugged for `opt_level = 3`|
+|[`d98b3a8_win11_i713700KF_4080super.csv`](./results/d98b3a8_win11_i713700KF_4080super.csv)|0.14|Bugged for `opt_level = 3`|
 
 ## Conclusions
 
-There's some very rudimentary analysis in the [./analysis](analysis) folder, but there are tradeoffs between frame time, compile time, and file size to consider, so you may want to do your own.
+There's some very rudimentary analysis in the [analysis](./analysis) folder, but there are tradeoffs between frame time, compile time, and file size to consider, so you may want to do your own.
 
 For own my dist builds, I will be using:
 
