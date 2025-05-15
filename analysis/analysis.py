@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -5,7 +6,9 @@ import statsmodels.formula.api as smf
 import re
 from matplotlib.backends.backend_pdf import PdfPages
 
-DATA_CSV = "../results/42674c1_win11_i713700KF_4080super.csv"
+if len(sys.argv) < 2:
+    print("Usage: analysis.py <csvfile>")
+    sys.exit(1)
 
 
 def build_formula(response_col, cat_vars, baselines_dict):
@@ -132,7 +135,7 @@ def create_lm_coef_plot(response_col, data):
 # Load and process data
 #
 
-data = pd.read_csv(DATA_CSV, sep=",", header=0, keep_default_na=False, na_values=[])
+data = pd.read_csv(sys.argv[1], sep=",", header=0, keep_default_na=False, na_values=[])
 
 cat_vars = ["opt_level", "wasm_opt", "lto", "codegen_units", "strip", "panic"]
 
