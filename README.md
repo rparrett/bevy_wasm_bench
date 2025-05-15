@@ -18,11 +18,11 @@ MIT or Apache 2.0
 
 ## Results
 
-|file|bevy|notes|
-|-|-|-|
-|[`42674c1_win11_i713700KF_4080super.csv`](./results/42674c1_win11_i713700KF_4080super.csv)|0.16|
-|[`6efce10_win11_i713700KF_4080super.csv`](./results/6efce10_win11_i713700KF_4080super.csv)|0.16|Bugged for `opt_level = 3`|
-|[`d98b3a8_win11_i713700KF_4080super.csv`](./results/d98b3a8_win11_i713700KF_4080super.csv)|0.14|Bugged for `opt_level = 3`|
+|file|bevy|wasm_opt|rust|notes|
+|-|-|-|-|-|
+|[`42674c1_win11_i713700KF_4080super.csv`](./results/42674c1_win11_i713700KF_4080super.csv)|0.16|123|1.86.0||
+|[`6efce10_win11_i713700KF_4080super.csv`](./results/6efce10_win11_i713700KF_4080super.csv)|0.16|123|1.86.0|Bugged for `opt_level = 3`|
+|[`d98b3a8_win11_i713700KF_4080super.csv`](./results/d98b3a8_win11_i713700KF_4080super.csv)|0.14|118|1.78.0|Bugged for `opt_level = 3`|
 
 ## Conclusions
 
@@ -32,8 +32,9 @@ For own my dist builds, I will be using:
 
 |setting|value|note|
 |-|-|-|
-|opt_level|`S`|`Z` is slow|
-|wasm_opt|`S`|Use this, but the particular setting isn't super important|
-|lto|`Fat`|`Thin` if compile time is a concern|
-|codegen_units|`Default`|`One` if file size is a concern|
-|strip|`None`|Insignificant|
+|opt_level|`S`|Avoid `Z`. `S` for file size, `3` for runtime performance.|
+|wasm_opt|`Z`|Use `wasm_opt`. `Z` is slightly better for slightly longer compiles.|
+|lto|`Fat`|`Thin` if compile time is at all a concern.|
+|codegen_units|`One`|Seems good all around when combined with `wasm_opt`.|
+|strip|`None`|Insignificant, and I want debug info.|
+|panic|`unwind`|Insignificant, and I want debug info.|
